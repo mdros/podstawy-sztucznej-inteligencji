@@ -6,7 +6,7 @@ import pygame
 from src.config import BLACK, FPS, GRAY, HEIGHT, WIDTH
 from src.entities.player import Player
 from src.entities.zombie import Zombie
-from utils import Obstacle, Point
+from utils import Obstacle, Point, check_collision
 
 pygame.init()
 
@@ -31,10 +31,20 @@ def draw_obstacles(obstacles: list[Obstacle]):
         pygame.draw.circle(screen, GRAY, astuple(obs.location), obs.radius)
 
 
+def create_zombies(screen: pygame.Surface, obstacles: list[Obstacle], num_agents: int) -> list[Zombie]:
+    zombies = []
+    for _ in range(num_agents):
+        location = Point(random.randint(50, WIDTH - 50), random.randint(50, HEIGHT - 50))
+        while check_collision(location, obstacles):
+            location = Point(random.randint(50, WIDTH - 50), random.randint(50, HEIGHT - 50))
+        zombies.append(Zombie(screen, location, obstacles))
+    return zombies
+
+
 def main():
     obstacles = create_obstacles()
+    agents = create_zombies(screen, obstacles, num_agents=5)
     player = Player(screen, Point(WIDTH // 2, HEIGHT // 2), obstacles)
-    agent = Zombie(screen, Point(random.randint(50, WIDTH - 50), random.randint(50, HEIGHT - 50)), obstacles)
 
     running = True
     while running:
@@ -44,13 +54,15 @@ def main():
 
         # Game logic
         player.move()
-        agent.update(player)
+        for agent in agents:
+            agent.update(player, agents)
 
         # Drawing
         screen.fill(BLACK)
         draw_obstacles(obstacles)
         player.draw()
-        agent.draw()
+        for agent in agents:
+            agent.draw()
         pygame.display.flip()
         clock.tick(FPS)
 
