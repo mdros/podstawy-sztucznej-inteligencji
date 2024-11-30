@@ -1,39 +1,22 @@
 import pygame
 
+from entities.player import Player
+
 pygame.init()
-screen = pygame.display.set_mode((1280, 720))
+screen = pygame.display.set_mode((1920, 1080))
+
+
+player = Player(1920 / 2, 1080 / 2, s_w=1920, s_h=1080)
+allSprites = pygame.sprite.Group(player)
+
 clock = pygame.time.Clock()
-running = True
-
-p_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-dt = 0
-
-while running:
+while True:
+    time_passed = clock.tick(60) / 1000
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
-
-    screen.fill("purple")
-
-    pygame.draw.polygon(
-        screen,
-        "red",
-        (p_pos, pygame.Vector2(p_pos.x + 100, p_pos.y - 200), pygame.Vector2(p_pos.x - 100, p_pos.y + 200)),
-        40,
-    )
-
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        p_pos.y -= 300 * dt
-    if keys[pygame.K_s]:
-        p_pos.y += 300 * dt
-    if keys[pygame.K_a]:
-        p_pos.x -= 300 * dt
-    if keys[pygame.K_d]:
-        p_pos.x += 300 * dt
-
+            pygame.quit()
+            exit()
+    allSprites.update()
+    screen.fill((220, 220, 255))
+    allSprites.draw(screen)
     pygame.display.flip()
-
-    dt = clock.tick(60) / 1000
-
-pygame.quit()
