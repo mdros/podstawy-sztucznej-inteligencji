@@ -1,22 +1,43 @@
+import random
+
 import pygame
 
-from entities.player import Player
+from src.config import BLACK, FPS, HEIGHT, WIDTH
+from src.entities.player import Player
+from src.entities.zombie import Zombie
+from utils import Point
 
 pygame.init()
-screen = pygame.display.set_mode((1920, 1080))
 
 
-player = Player(1920 / 2, 1080 / 2, s_w=1920, s_h=1080)
-allSprites = pygame.sprite.Group(player)
-
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Game")
 clock = pygame.time.Clock()
-while True:
-    time_passed = clock.tick(60) / 1000
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
-    allSprites.update()
-    screen.fill((220, 220, 255))
-    allSprites.draw(screen)
-    pygame.display.flip()
+
+
+def main():
+    player = Player(Point(WIDTH // 2, HEIGHT // 2), screen)
+    agent = Zombie(Point(random.randint(50, WIDTH - 50), random.randint(50, HEIGHT - 50)), screen)
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        # Game logic
+        player.move()
+        agent.update(player)
+
+        # Drawing
+        screen.fill(BLACK)
+        player.draw()
+        agent.draw()
+        pygame.display.flip()
+        clock.tick(FPS)
+
+    pygame.quit()
+
+
+if __name__ == "__main__":
+    main()
