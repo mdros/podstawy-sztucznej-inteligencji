@@ -4,12 +4,11 @@ import random
 import pygame
 
 from src.config import BLUE, GREEN, HEIGHT, RED, WIDTH
-from src.entities.player import Player
-from utils import Point, distance
+from utils import Obstacle, Point, check_collision, distance
 
 
 class Zombie:
-    def __init__(self, location: Point, screen: pygame.Surface):
+    def __init__(self, screen: pygame.Surface, location: Point, obstacles: list[Obstacle]):
         self.screen = screen
         self.location = location
         self.speed = 2
@@ -18,6 +17,7 @@ class Zombie:
         self.current_waypoint = 0
         self.detection_radius = 150
         self.attack_radius = 50
+        self.obstacles = obstacles
 
     def patrol(self):
         # Move towards the current waypoint
@@ -38,10 +38,11 @@ class Zombie:
         dist = math.sqrt(dx**2 + dy**2)
         if dist > 0:
             dx, dy = dx / dist, dy / dist
-        self.location.x += dx * self.speed
-        self.location.y += dy * self.speed
+        new_position = Point(self.location.x + dx * self.speed, self.location.y + dy * self.speed)
+        if not check_collision(new_position, self.obstacles):
+            self.location = new_position
 
-    def update(self, player: Player):
+    def update(self, player):
         # State transitions
         if self.state == "Patrol":
             if distance(self.location, player.location) < self.detection_radius:
