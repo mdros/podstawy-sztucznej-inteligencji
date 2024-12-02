@@ -64,7 +64,7 @@ def main():
         player.update_bullets(zombies=zombies)
 
         for zombie in zombies:
-            zombie.update(player, zombies, player.bullets)
+            zombie.update(player, zombies)
 
         # Drawing
         screen.fill(BLACK)
