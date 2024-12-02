@@ -51,9 +51,14 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  
+                    mouse_pos = pygame.mouse.get_pos()
+                    player.shoot(mouse_pos) 
 
         # Game logic
         player.move()
+        player.update_bullets()
         for agent in agents:
             agent.update(player, agents)
 
