@@ -41,9 +41,12 @@ def create_zombies(screen: pygame.Surface, obstacles: list[Obstacle], num_agents
     return zombies
 
 
+# Adjust hit radius as needed
+
+
 def main():
     obstacles = create_obstacles()
-    agents = create_zombies(screen, obstacles, num_agents=5)
+    zombies = create_zombies(screen, obstacles, num_agents=5)
     player = Player(screen, Point(WIDTH // 2, HEIGHT // 2), obstacles)
 
     running = True
@@ -52,22 +55,23 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  
+                if event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
-                    player.shoot(mouse_pos) 
+                    player.shoot(mouse_pos)
 
         # Game logic
         player.move()
-        player.update_bullets()
-        for agent in agents:
-            agent.update(player, agents)
+        player.update_bullets(zombies=zombies)
+
+        for zombie in zombies:
+            zombie.update(player, zombies, player.bullets)
 
         # Drawing
         screen.fill(BLACK)
         draw_obstacles(obstacles)
         player.draw()
-        for agent in agents:
-            agent.draw()
+        for zombie in zombies:
+            zombie.draw()
         pygame.display.flip()
         clock.tick(FPS)
 

@@ -1,10 +1,14 @@
 import math
 import random
+from typing import TYPE_CHECKING
 
 import pygame
 
 from src.config import BLUE, GREEN, HEIGHT, RED, WIDTH
-from utils import Obstacle, Point, check_collision, distance
+from utils import Bullet, Obstacle, Point, check_collision, distance
+
+if TYPE_CHECKING:
+    from src.entities.player import Player
 
 
 class Zombie:
@@ -47,7 +51,7 @@ class Zombie:
         ):
             self.location = new_position
 
-    def hide(self, player):
+    def hide(self, player: "Player"):
         # Find the nearest obstacle to hide behind
         closest_obstacle = None
         closest_distance = float("inf")
@@ -77,11 +81,11 @@ class Zombie:
 
     def check_proximity(self, zombies: list["Zombie"]):
         for other in zombies:
-            if other != self and distance(self.location, other.location) < 30:  # Threshold for "nearby"
+            if other != self and distance(self.location, other.location) < 20:  # Threshold for "nearby"
                 self.state = "Attack"
                 other.state = "Attack"
 
-    def update(self, player, zombies):
+    def update(self, player: "Player", zombies: list["Zombie"], bullets: list[Bullet]):
         self.check_proximity(zombies)
 
         # State transitions

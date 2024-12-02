@@ -1,8 +1,10 @@
-import pygame
-import math 
+import math
 
-from src.config import WHITE, HEIGHT, WIDTH, RED
-from utils import Obstacle, Point, check_collision
+import pygame
+
+from src.config import HEIGHT, RED, WHITE, WIDTH
+from src.entities.zombie import Zombie
+from utils import Bullet, Obstacle, Point, check_collision, is_zombie_hit
 
 
 class Player:
@@ -11,7 +13,7 @@ class Player:
         self.location = location
         self.speed = 4
         self.obstacles = obstacles
-        self.bullets = [] 
+        self.bullets: list[Bullet] = []
 
     def move(self):
         keys = pygame.key.get_pressed()
@@ -27,14 +29,11 @@ class Player:
             dx += 1
 
         magnitude = math.sqrt(dx**2 + dy**2)
-        if magnitude > 0:  
+        if magnitude > 0:
             dx = (dx / magnitude) * self.speed
             dy = (dy / magnitude) * self.speed
 
-        new_position = Point(
-            max(0, min(WIDTH, self.location.x + dx)),
-            max(0, min(HEIGHT, self.location.y + dy)) 
-        )
+        new_position = Point(max(0, min(WIDTH, self.location.x + dx)), max(0, min(HEIGHT, self.location.y + dy)))
 
         if not check_collision(new_position, self.obstacles):
             self.location = new_position
@@ -44,27 +43,35 @@ class Player:
         dy = mouse_pos[1] - self.location.y
 
         magnitude = math.sqrt(dx**2 + dy**2)
-        if magnitude > 0:  
-            dx = dx / magnitude * 8 
+        if magnitude > 0:
+            dx = dx / magnitude * 8
             dy = dy / magnitude * 8
             bullet_position = Point(self.location.x, self.location.y)
-            self.bullets.append({"position": bullet_position, "velocity": (dx, dy)})
+            self.bullets.append(Bullet(position=bullet_position, velocity=pygame.Vector2(dx, dy)))
 
-    def update_bullets(self):
-        for bullet in self.bullets[:]:
-            bullet["position"].x += bullet["velocity"][0]
-            bullet["position"].y += bullet["velocity"][1]
+    def update_bullets(self, zombies: list["Zombie"]):
+        for bullet in self.bullets:
+            bullet.position.x += bullet.velocity[0]
+            bullet.position.y += bullet.velocity[1]
+
+            for zombie in zombies[:]:
+                if is_zombie_hit(zombie, bullet):
+                    zombies.remove(zombie)
+                    self.bullets.remove(bullet)
+                    break
 
             if (
-                bullet["position"].x < 0 or bullet["position"].x > WIDTH or
-                bullet["position"].y < 0 or bullet["position"].y > HEIGHT or 
-                check_collision(bullet["position"], self.obstacles)
+                bullet.position.x < 0
+                or bullet.position.x > WIDTH
+                or bullet.position.y < 0
+                or bullet.position.y > HEIGHT
+                or check_collision(bullet.position, self.obstacles)
             ):
                 self.bullets.remove(bullet)
 
     def draw_bullets(self):
         for bullet in self.bullets:
-            pygame.draw.circle(self.screen, RED, (int(bullet["position"].x), int(bullet["position"].y)), 5)
+            pygame.draw.circle(self.screen, RED, (int(bullet.position.x), int(bullet.position.y)), 5)
 
     def draw(self):
         pygame.draw.circle(self.screen, WHITE, (int(self.location.x), int(self.location.y)), 10)
