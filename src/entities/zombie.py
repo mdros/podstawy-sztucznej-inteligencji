@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from src.config import BLUE, GREEN, HEIGHT, RED, WIDTH
+from src.config import BLUE, HEIGHT, RED, WIDTH, YELLOW
 from utils import Obstacle, Point, check_collision, distance
 
 if TYPE_CHECKING:
@@ -15,7 +15,7 @@ class Zombie:
     def __init__(self, screen: pygame.Surface, location: Point, obstacles: list[Obstacle]):
         self.screen = screen
         self.location = location
-        self.speed = 1
+        self.speed = 0.7
         self.state = "Hide"
         self.obstacles = obstacles
         self.direction = self.random_direction()
@@ -129,9 +129,11 @@ class Zombie:
         self.move_towards(player.location)
 
     def check_proximity(self, zombies: list["Zombie"]):
-        for other in zombies:
-            if other != self and distance(self.location, other.location) < 20:
-                self.state = "Attack"
+        nearby_zombies = [other for other in zombies if other != self and distance(self.location, other.location) < 20]
+
+        if len(nearby_zombies) >= 2:
+            self.state = "Attack"
+            for other in nearby_zombies:
                 other.state = "Attack"
 
     def update(self, player: "Player", zombies: list["Zombie"]):
@@ -155,5 +157,5 @@ class Zombie:
             self.move()
 
     def draw(self):
-        color = RED if self.state == "Attack" else (GREEN if self.state == "Risk" else BLUE)
-        pygame.draw.circle(self.screen, color, (int(self.location.x), int(self.location.y)), 10)
+        color = RED if self.state == "Attack" else (YELLOW if self.state == "Risk" else BLUE)
+        pygame.draw.circle(self.screen, color, (int(self.location.x), int(self.location.y)), 5)

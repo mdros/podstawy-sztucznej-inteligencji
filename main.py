@@ -43,7 +43,7 @@ def create_zombies(screen: pygame.Surface, obstacles: list[Obstacle], num_agents
 
 def main():
     obstacles = create_obstacles()
-    zombies = create_zombies(screen, obstacles, num_agents=5)
+    zombies = create_zombies(screen, obstacles, num_agents=10)
     player = Player(screen, Point(WIDTH // 2, HEIGHT // 2), obstacles)
 
     running = True

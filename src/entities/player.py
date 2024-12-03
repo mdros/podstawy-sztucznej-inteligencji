@@ -67,7 +67,8 @@ class Player:
                 or bullet.position.y > HEIGHT
                 or check_collision(bullet.position, self.obstacles)
             ):
-                self.bullets.remove(bullet)
+                if bullet in self.bullets:
+                    self.bullets.remove(bullet)
 
     def draw_bullets(self):
         for bullet in self.bullets:
