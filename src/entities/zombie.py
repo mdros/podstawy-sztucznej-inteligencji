@@ -15,7 +15,7 @@ class Zombie:
     def __init__(self, screen: pygame.Surface, location: Point, obstacles: list[Obstacle]):
         self.screen = screen
         self.location = location
-        self.speed = 2
+        self.speed = 1
         self.state = "Hide"
         self.obstacles = obstacles
         self.direction = self.random_direction()
@@ -30,19 +30,15 @@ class Zombie:
         self.direction = self.random_direction()
 
     def slide_along_obstacle(self, obstacle: Obstacle):
-        # Vector from zombie to obstacle center
         to_obstacle = Point(obstacle.location.x - self.location.x, obstacle.location.y - self.location.y)
         distance_to_obstacle = math.sqrt(to_obstacle.x**2 + to_obstacle.y**2)
 
-        # Normalize the vector
         if distance_to_obstacle > 0:
             to_obstacle.x /= distance_to_obstacle
             to_obstacle.y /= distance_to_obstacle
 
-        # Tangent vector is perpendicular to the normalized vector
         tangent = Point(-to_obstacle.y, to_obstacle.x)
 
-        # Move along the tangent
         self.location.x += tangent.x * self.speed
         self.location.y += tangent.y * self.speed
 
@@ -91,7 +87,6 @@ class Zombie:
             self.location = new_position
 
     def hide(self, player: "Player"):
-        # Find the nearest obstacle to hide behind
         closest_obstacle = None
         closest_distance = float("inf")
         for obstacle in self.obstacles:
@@ -101,7 +96,6 @@ class Zombie:
                 closest_distance = d
 
         if closest_obstacle:
-            # Move to the side of the obstacle opposite the player
             dx = closest_obstacle.location.x - player.location.x
             dy = closest_obstacle.location.y - player.location.y
             hide_point = Point(
@@ -136,7 +130,7 @@ class Zombie:
 
     def check_proximity(self, zombies: list["Zombie"]):
         for other in zombies:
-            if other != self and distance(self.location, other.location) < 20:  # Threshold for "nearby"
+            if other != self and distance(self.location, other.location) < 20:
                 self.state = "Attack"
                 other.state = "Attack"
 
@@ -145,14 +139,14 @@ class Zombie:
 
         # State transitions
         if self.state == "Hide":
-            if random.random() < 0.01:  # Small chance to switch to Risk
+            if random.random() < 0.01:
                 self.state = "Risk"
             else:
                 self.hide(player)
         elif self.state == "Risk":
             self.risk()
             self.time_in_risk += 1
-            if self.time_in_risk > 100:  # After some time, go back to hiding
+            if self.time_in_risk > 100:
                 self.state = "Hide"
                 self.time_in_risk = 0
         elif self.state == "Attack":

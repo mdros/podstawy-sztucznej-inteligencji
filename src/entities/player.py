@@ -11,7 +11,7 @@ class Player:
     def __init__(self, screen: pygame.Surface, location: Point, obstacles: list[Obstacle]):
         self.screen = screen
         self.location = location
-        self.speed = 4
+        self.speed = 3
         self.obstacles = obstacles
         self.bullets: list[Bullet] = []
 
